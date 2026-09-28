@@ -1,4 +1,5 @@
 import java.util.Scanner;
+import java.util.InputMismatchException;
 
 class HotelReservation {
 
@@ -9,33 +10,96 @@ class HotelReservation {
     int people;
     boolean booked = false;
 
+    // Table availability
+    boolean[] tableBooked = new boolean[6];
+
     void showTables() {
         System.out.println("\n===== TABLES =====");
-        System.out.println("Table 1 - 2 People");
-        System.out.println("Table 2 - 2 People");
-        System.out.println("Table 3 - 4 People");
-        System.out.println("Table 4 - 4 People");
-        System.out.println("Table 5 - 6 People");
+
+        System.out.println("Table 1 - 2 People - "
+                + (tableBooked[1] ? "Booked" : "Available"));
+
+        System.out.println("Table 2 - 2 People - "
+                + (tableBooked[2] ? "Booked" : "Available"));
+
+        System.out.println("Table 3 - 4 People - "
+                + (tableBooked[3] ? "Booked" : "Available"));
+
+        System.out.println("Table 4 - 4 People - "
+                + (tableBooked[4] ? "Booked" : "Available"));
+
+        System.out.println("Table 5 - 6 People - "
+                + (tableBooked[5] ? "Booked" : "Available"));
     }
 
     void bookTable() {
 
-        showTables();
+        try {
+            showTables();
 
-        System.out.print("\nEnter Table Number: ");
-        tableNumber = sc.nextInt();
+            System.out.print("\nEnter Table Number: ");
+            tableNumber = sc.nextInt();
 
-        System.out.print("Enter Number of People: ");
-        people = sc.nextInt();
+            // Check valid table number
+            if (tableNumber < 1 || tableNumber > 5) {
+                System.out.println("Invalid Table Number!");
+                return;
+            }
 
-        sc.nextLine();
+            // Check table availability
+            if (tableBooked[tableNumber]) {
+                System.out.println("Sorry! Table " + tableNumber
+                        + " is already booked.");
+                return;
+            }
 
-        System.out.print("Enter Customer Name: ");
-        customerName = sc.nextLine();
+            System.out.print("Enter Number of People: ");
+            people = sc.nextInt();
 
-        booked = true;
+            if (people <= 0) {
+                System.out.println("Number of people must be greater than 0.");
+                return;
+            }
 
-        System.out.println("\nTable Booked Successfully!");
+            // Check table capacity
+            if (tableNumber == 1 || tableNumber == 2) {
+                if (people > 2) {
+                    System.out.println("This table can accommodate only 2 people.");
+                    return;
+                }
+            }
+
+            if (tableNumber == 3 || tableNumber == 4) {
+                if (people > 4) {
+                    System.out.println("This table can accommodate only 4 people.");
+                    return;
+                }
+            }
+
+            if (tableNumber == 5) {
+                if (people > 6) {
+                    System.out.println("This table can accommodate only 6 people.");
+                    return;
+                }
+            }
+
+            sc.nextLine();
+
+            System.out.print("Enter Customer Name: ");
+            customerName = sc.nextLine();
+
+            tableBooked[tableNumber] = true;
+            booked = true;
+
+            System.out.println("\nTable Booked Successfully!");
+
+        } catch (InputMismatchException e) {
+
+            System.out.println("\nInvalid Input!");
+            System.out.println("Please enter numbers only.");
+
+            sc.nextLine();
+        }
     }
 
     void viewBooking() {
@@ -52,11 +116,26 @@ class HotelReservation {
 
     void cancelBooking() {
 
-        if (booked) {
-            booked = false;
-            System.out.println("\nBooking Cancelled Successfully!");
-        } else {
-            System.out.println("\nNo booking found.");
+        try {
+
+            if (booked) {
+
+                tableBooked[tableNumber] = false;
+                booked = false;
+
+                System.out.println("\nBooking Cancelled Successfully!");
+                System.out.println("Table " + tableNumber + " is now Available.");
+
+            } else {
+
+                System.out.println("\nNo booking found.");
+
+            }
+
+        } catch (Exception e) {
+
+            System.out.println("Error while cancelling booking.");
+
         }
     }
 
@@ -64,43 +143,54 @@ class HotelReservation {
 
         HotelReservation hotel = new HotelReservation();
 
-        int choice;
+        int choice = 0;
 
         do {
-            System.out.println("\n===== HOTEL TABLE RESERVATION =====");
-            System.out.println("1. View Tables");
-            System.out.println("2. Book Table");
-            System.out.println("3. View Booking");
-            System.out.println("4. Cancel Booking");
-            System.out.println("5. Exit");
 
-            System.out.print("Enter Choice: ");
-            choice = hotel.sc.nextInt();
+            try {
 
-            switch (choice) {
+                System.out.println("\n===== HOTEL TABLE RESERVATION =====");
+                System.out.println("1. View Tables");
+                System.out.println("2. Book Table");
+                System.out.println("3. View Booking");
+                System.out.println("4. Cancel Booking");
+                System.out.println("5. Exit");
 
-                case 1:
-                    hotel.showTables();
-                    break;
+                System.out.print("Enter Choice: ");
+                choice = hotel.sc.nextInt();
 
-                case 2:
-                    hotel.bookTable();
-                    break;
+                switch (choice) {
 
-                case 3:
-                    hotel.viewBooking();
-                    break;
+                    case 1:
+                        hotel.showTables();
+                        break;
 
-                case 4:
-                    hotel.cancelBooking();
-                    break;
+                    case 2:
+                        hotel.bookTable();
+                        break;
 
-                case 5:
-                    System.out.println("\nThank You! Visit Again!");
-                    break;
+                    case 3:
+                        hotel.viewBooking();
+                        break;
 
-                default:
-                    System.out.println("\nInvalid Choice!");
+                    case 4:
+                        hotel.cancelBooking();
+                        break;
+
+                    case 5:
+                        System.out.println("\nThank You! Visit Again!");
+                        break;
+
+                    default:
+                        System.out.println("\nInvalid Choice!");
+                }
+
+            } catch (InputMismatchException e) {
+
+                System.out.println("\nInvalid Input!");
+                System.out.println("Please enter a number from 1 to 5.");
+
+                hotel.sc.nextLine();
             }
 
         } while (choice != 5);
